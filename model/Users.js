@@ -18,6 +18,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       min: 6,
     },
+
     profile: {
       bio: {
         type: String,
@@ -31,15 +32,11 @@ const UserSchema = new mongoose.Schema(
         type: String,
         default: "",
       },
-      first_name: {
+      name: {
         type: String,
         default: "",
       },
-      last_name: {
-        type: String,
-        default: "",
-      },
-      verified: {
+      is_verified: {
         type: Boolean,
         default: false,
       },
@@ -47,15 +44,16 @@ const UserSchema = new mongoose.Schema(
         type: Date,
         default: Date.now,
       },
+      profile_picture: {
+        type: String,
+        default: "",
+      },
+      cover_picture: {
+        type: String,
+        default: "",
+      },
     },
-    profilePicture: {
-      type: String,
-      default: "",
-    },
-    coverPicture: {
-      type: String,
-      default: "",
-    },
+
     followers: {
       type: Array,
       default: [],
@@ -64,29 +62,6 @@ const UserSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    // tweets: {
-    //   type: Array,
-    //   default: [
-    //     {
-    //       tweet: String,
-    //       likes: {
-    //         type: Array,
-    //         default: [],
-    //       },
-    //       retweets: {
-    //         type: Array,
-    //         default: [],
-    //       },
-    //       comments: [
-    //         {
-    //           username: String,
-    //           comment: String,
-    //         },
-    //       ],
-    //     },
-    //     { timestamps: true },
-    //   ],
-    // },
   },
   { timestamps: true, virtuals: true }
 );
