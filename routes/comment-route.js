@@ -7,12 +7,13 @@ const router = require("express").Router();
 router.post("/create/:id", async (req, res) => {
   const user = getLoggedInUser(req);
 
+  console.log("comment tweet", req.params);
   try {
     const new_comment = new Comment({
       content: req.body.content,
       user: user.id,
       tweet: req.params.id,
-      image: req.params.image,
+      image: req.body.image || [],
     });
 
     await new_comment.save();

@@ -21,6 +21,7 @@ router.get("/getAll", async (req, res) => {
           "no_of_likes",
           "updatedAt",
           "tweet",
+          "image",
         ],
         populate: {
           path: "user",
@@ -96,19 +97,19 @@ router.get("/getById/:id", async (req, res) => {
 
 // create tweet
 router.post("/create", async (req, res) => {
+  const user = getLoggedInUser(req);
   try {
-    const user = await User.findOne({ _id: req.body.user_id });
     const new_tweet = new Tweet({
       content: req.body.content,
-      image: req.body.image,
-      user: req.body.user,
+      image: req.body.image || [],
+      user: user.id,
     });
 
     const added_tweet = await new_tweet.save();
 
     res.status(200).json({ message: "sucessfull", data: added_tweet });
   } catch (err) {
-    res.status(500).josn({ message: err });
+    res.status(500).json({ message: err });
   }
 });
 
