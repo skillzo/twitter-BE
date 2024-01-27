@@ -5,10 +5,7 @@ const User = require("../model/Users");
 const router = require("express").Router();
 
 //get all tweets
-let getAllCount = 0;
 router.get("/getAll", async (req, res) => {
-  getAllCount += 1;
-  console.log("query times for get all tweet", getAllCount);
   try {
     const all_tweets = await Tweet.find()
       .sort({ createdAt: -1 })
@@ -52,10 +49,8 @@ router.get("/getAll", async (req, res) => {
 });
 
 //get tweets by id
-let count = 0;
+
 router.get("/getById/:id", async (req, res) => {
-  count += 1;
-  console.log("query times for tweetById", count);
   try {
     const tweet_by_id = await Tweet.findOne({ _id: req.params.id })
       .populate({
@@ -98,6 +93,7 @@ router.get("/getById/:id", async (req, res) => {
 // create tweet
 router.post("/create", async (req, res) => {
   const user = getLoggedInUser(req);
+
   try {
     const new_tweet = new Tweet({
       content: req.body.content,

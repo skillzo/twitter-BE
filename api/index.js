@@ -9,6 +9,7 @@ const commentRoute = require("./routes/comment-route");
 
 const { default: mongoose } = require("mongoose");
 const verifyjwt = require("./libs/verifyJWt");
+const jwt = require("jsonwebtoken");
 dotenv.config();
 
 mongoose.connect(process.env.mongoDB_URI);
@@ -24,5 +25,5 @@ app.use("/api/tweet", tweetRoute);
 app.use("/api/comment", commentRoute);
 
 app.listen(8000, () => {
-  console.log("server running on port 3000");
+  console.log("server running on port 8000");
 });
