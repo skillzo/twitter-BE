@@ -53,6 +53,7 @@ router.post("/login", async (req, res) => {
       });
     }
   } catch (err) {
+    console.log("login error here", err);
     res.sendStatus(500);
   }
 });
