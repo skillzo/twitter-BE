@@ -13,7 +13,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
-//get relatng to a coonversation
+//get exiting conversation users to a coonversation
 router.get("/:conversationId", async (req, res) => {
   try {
     const messages = await Message.find({

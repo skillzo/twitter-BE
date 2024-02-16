@@ -44,6 +44,38 @@ router.post("/create", async (req, res) => {
   }
 });
 
+router.get("/getById/:id", async (req, res) => {
+  try {
+    const user = await User.findById({ _id: req.params.id }, { password: 0 })
+      .populate({
+        path: "followings",
+        model: "User",
+        select: [
+          "_id",
+          "username",
+          "profile.name",
+          "profile.is_verified",
+          "profile.profile_picture",
+        ],
+      })
+      .populate({
+        path: "followers",
+        model: "User",
+        select: [
+          "_id",
+          "username",
+          "profile.name",
+          "profile.is_verified",
+          "profile.profile_picture",
+        ],
+      });
+
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 //update user
 router.put("/update/:id", async (req, res) => {
   try {
@@ -74,97 +106,51 @@ router.delete("/delete/:id", async (req, res) => {
 // follow user
 router.post("/follow/:id", async (req, res) => {
   try {
-    const user_token = getLoggedInUser(req); // this is a function that gets the id of the logged in user from the token
-    const loggedIn_user = await User.findOne({ _id: user_token.id });
+    const loggedIn_user = getLoggedInUser(req);
     const to_be_followed = await User.findOne({ _id: req.params.id });
 
-    const already_follow = to_be_followed?.followers.some((user) =>
-      new mongoose.Types.ObjectId(user.id).equals(loggedIn_user._id)
+    const already_follow = to_be_followed.followers.some((f) =>
+      f.includes(loggedIn_user.id)
     );
 
     if (already_follow) {
-      return res.status(409).json({ message: "You already follow this user" });
-    }
-
-    // update logged in user followings
-    await User.findByIdAndUpdate(
-      { _id: loggedIn_user._id },
-      {
-        $push: {
-          followings: {
-            id: to_be_followed._id,
-            username: to_be_followed.username,
-            name: to_be_followed.profile.name,
-            profile_picture: to_be_followed.profile_picture,
-          },
-        },
-      }
-    );
-    //  update to be followed user followers
-    await User.findByIdAndUpdate(
-      { _id: to_be_followed.id },
-      {
-        $push: {
-          followers: {
-            id: loggedIn_user._id,
-            username: loggedIn_user.username,
-            name: loggedIn_user.profile.name,
-            profile_picture: loggedIn_user.profile.profile_picture,
-          },
-        },
-      }
-    );
-
-    return res.status(200).json({
-      message: "successfull",
-      data: { loggedIn_user, to_be_followed },
-    });
-  } catch (err) {
-    return res.status(500).json({ message: err });
-  }
-});
-
-// unfollow user
-router.post("/unfollow/:id", async (req, res) => {
-  try {
-    const user_token = getLoggedInUser(req); // this is a function that gets the id of the logged in user from the token
-    const loggedIn_user = await User.findOne({ _id: user_token.id });
-    const to_be_unfollowed = await User.findOne({ _id: req.params.id });
-
-    const user_follows = to_be_unfollowed?.followers.some((user) =>
-      new mongoose.Types.ObjectId(user.id).equals(loggedIn_user._id)
-    );
-
-    if (user_follows) {
-      // update followings of the logged in user
       await User.findByIdAndUpdate(
-        { _id: loggedIn_user._id },
+        { _id: loggedIn_user.id },
         {
           $pull: {
-            followings: {
-              id: to_be_unfollowed._id,
-            },
+            followings: to_be_followed._id,
           },
         }
       );
 
-      // update the followers of the other user
       await User.findByIdAndUpdate(
-        { _id: to_be_unfollowed._id },
+        { _id: to_be_followed._id },
         {
           $pull: {
-            followers: {
-              id: loggedIn_user._id,
-            },
+            followers: loggedIn_user.id,
           },
         }
       );
-
-      return res
-        .status(200)
-        .json({ message: "successfully unfollowed this user" });
+      res.status(200).json("User has been unfollowed");
     } else {
-      return res.status(404).json({ message: "You don't follow this user" });
+      await User.findByIdAndUpdate(
+        { _id: loggedIn_user.id },
+        {
+          $push: {
+            followings: to_be_followed._id,
+          },
+        }
+      );
+
+      await User.findByIdAndUpdate(
+        { _id: to_be_followed._id },
+        {
+          $push: {
+            followers: loggedIn_user.id,
+          },
+        }
+      );
+      res.status(200).json("User has been followed");
     }
   } catch (err) {
     return res.status(500).json({ message: err });

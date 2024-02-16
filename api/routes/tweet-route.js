@@ -49,7 +49,6 @@ router.get("/getAll", async (req, res) => {
 });
 
 //get tweets by id
-
 router.get("/getById/:id", async (req, res) => {
   try {
     const tweet_by_id = await Tweet.findOne({ _id: req.params.id })
@@ -116,44 +115,52 @@ router.post("/like/:id", async (req, res) => {
   try {
     const tweet = await Tweet.findOne({ _id: req.params.id });
 
-    await Tweet.findByIdAndUpdate(
-      { _id: req.params.id },
-      { $push: { likes: loggedIn_user }, $inc: { no_of_likes: 1 } }
+    const already_liked = tweet.likes.some((like) =>
+      like.id.includes(loggedIn_user.id)
     );
 
-    return res.status(200).json({ message: "Successful" });
+    if (already_liked) {
+      await Tweet.findByIdAndUpdate(
+        { _id: req.params.id },
+        { $pull: { likes: loggedIn_user } }
+      );
+      res.status(200).json("Tweet has been unliked");
+    } else {
+      await Tweet.findByIdAndUpdate(
+        { _id: req.params.id },
+        { $push: { likes: loggedIn_user } }
+      );
+      res.status(200).json("Tweet has been liked");
+    }
   } catch (err) {
     return res.status(500).json({ message: err });
   }
 });
 
-// unlike tweet
-router.post("/unlike/:id", async (req, res) => {
+// retweet
+router.post("/retweet/:id", async (req, res) => {
   const loggedIn_user = getLoggedInUser(req);
 
   try {
-    await Tweet.findByIdAndUpdate(
-      { _id: req.params.id },
-      { $pull: { likes: { id: loggedIn_user.id } }, $inc: { no_of_likes: -1 } }
+    const tweet = await Tweet.findOne({ _id: req.params.id });
+
+    const already_liked = tweet.likes.some((like) =>
+      like.id.includes(loggedIn_user.id)
     );
 
-    return res.status(200).json({ message: "Successful" });
-  } catch (err) {
-    return res.status(500).json({ message: err });
-  }
-});
-
-// retweet twwet
-router.post("/unlike/:id", async (req, res) => {
-  const loggedIn_user = getLoggedInUser(req);
-
-  try {
-    await Tweet.findByIdAndUpdate(
-      { _id: req.params.id },
-      { $pull: { likes: { id: loggedIn_user.id } }, $inc: { no_of_likes: -1 } }
-    );
-
-    return res.status(200).json({ message: "Successful" });
+    if (already_liked) {
+      await Tweet.findByIdAndUpdate(
+        { _id: req.params.id },
+        { $pull: { likes: loggedIn_user } }
+      );
+      res.status(200).json("Tweet has been unliked");
+    } else {
+      await Tweet.findByIdAndUpdate(
+        { _id: req.params.id },
+        { $push: { likes: loggedIn_user } }
+      );
+      res.status(200).json("Tweet has been liked");
+    }
   } catch (err) {
     return res.status(500).json({ message: err });
   }
