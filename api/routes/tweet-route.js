@@ -1,6 +1,8 @@
+const Mongoose = require("mongoose");
 const getLoggedInUser = require("../libs/getLoggedInUser");
 const Tweet = require("../model/Tweets");
 const User = require("../model/Users");
+const Retweet = require("../model/Retweets");
 
 const router = require("express").Router();
 
@@ -89,6 +91,27 @@ router.get("/getById/:id", async (req, res) => {
   }
 });
 
+//get user tweet
+router.get("/getByUser/:id", async (req, res) => {
+  try {
+    const all_user_tweets = await Tweet.find({
+      user: req.params.id,
+    }).populate({
+      path: "user",
+      select: [
+        "_id",
+        "username",
+        "profile.name",
+        "profile.verified",
+        "profile.profile_picture",
+      ],
+    });
+    res.status(200).json(all_user_tweets);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // create tweet
 router.post("/create", async (req, res) => {
   const user = getLoggedInUser(req);
@@ -138,32 +161,54 @@ router.post("/like/:id", async (req, res) => {
 });
 
 // retweet
-router.post("/retweet/:id", async (req, res) => {
+router.get("/retweet/:id", async (req, res) => {
   const loggedIn_user = getLoggedInUser(req);
 
   try {
     const tweet = await Tweet.findOne({ _id: req.params.id });
-
-    const already_liked = tweet.likes.some((like) =>
-      like.id.includes(loggedIn_user.id)
+    const already_retweeted = tweet.retweets.some((retweet) =>
+      retweet.includes(loggedIn_user.id)
     );
 
-    if (already_liked) {
+    if (already_retweeted) {
       await Tweet.findByIdAndUpdate(
         { _id: req.params.id },
-        { $pull: { likes: loggedIn_user } }
+        { $pull: { retweets: loggedIn_user.id } }
       );
-      res.status(200).json("Tweet has been unliked");
+      await Retweet.findOneAndDelete({
+        user: loggedIn_user.id,
+        tweet: tweet._id,
+      });
+      res.status(200).json("retweet removed ");
     } else {
       await Tweet.findByIdAndUpdate(
         { _id: req.params.id },
-        { $push: { likes: loggedIn_user } }
+        { $push: { retweets: loggedIn_user.id } }
       );
-      res.status(200).json("Tweet has been liked");
+      await Retweet.create({
+        user: loggedIn_user.id,
+        tweet: tweet._id,
+      });
+      res.status(200).json("Tweet has been retweeted");
     }
   } catch (err) {
-    return res.status(500).json({ message: err });
+    return res.status(500).json(err);
   }
 });
 
+// get timeline feeds
+router.get("/timelineFeed", async (req, res) => {
+  const loggedIn_user = getLoggedInUser(req);
+  try {
+    const user = await User.findOne({ _id: loggedIn_user.id });
+
+    const timeline_post = await Promise.all(
+      user.followings.map((f) => Tweet.find({ user: f }))
+    );
+
+    res.status(200).json(timeline_post);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 module.exports = router;

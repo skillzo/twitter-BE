@@ -5,17 +5,6 @@ const { mongoose } = require("mongoose");
 const User = require("../model/Users");
 const getLoggedInUser = require("../libs/getLoggedInUser");
 
-//get all users
-router.get("/getAll", async (_, res) => {
-  try {
-    const all_users = await User.find({}, { password: 0 });
-
-    return res.status(200).json({ message: "Sucessful", data: all_users });
-  } catch (err) {
-    return res.status(500).json({ message: err });
-  }
-});
-
 //create user
 router.post("/create", async (req, res) => {
   const payload = req.body;
@@ -41,6 +30,25 @@ router.post("/create", async (req, res) => {
     res.status(200).json({ message: "succesful", data: user });
   } catch (err) {
     res.status(500).json(err);
+  }
+});
+
+//get all users
+router.get("/getAll", async (req, res) => {
+  try {
+    const all_users = await User.find(
+      {
+        $or: [
+          { username: { $regex: req.query.name, $options: "i" } },
+          { "profile.name": { $regex: req.query.name, $options: "i" } },
+        ],
+      },
+      { password: 0 }
+    );
+
+    return res.status(200).json(all_users);
+  } catch (err) {
+    return res.status(500).json({ message: err });
   }
 });
 

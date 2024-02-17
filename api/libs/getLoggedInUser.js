@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const getLoggedInUser = (req) => {
+const getLoggedInUser = (req, res) => {
   const user_token = req.headers.Authorization || req.headers.authorization;
 
   const token = user_token.split(" ")[1];

@@ -16,16 +16,6 @@ const TweetSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    no_of_comments: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    no_of_retweets: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
     no_of_likes: {
       type: Number,
       default: 0,
