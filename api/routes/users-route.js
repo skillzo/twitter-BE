@@ -35,17 +35,18 @@ router.post("/create", async (req, res) => {
 
 //get all users
 router.get("/getAll", async (req, res) => {
+  let query = {};
   try {
-    const all_users = await User.find(
-      {
+    if (req.query.name) {
+      query = {
         $or: [
           { username: { $regex: req.query.name, $options: "i" } },
           { "profile.name": { $regex: req.query.name, $options: "i" } },
         ],
-      },
-      { password: 0 }
-    );
+      };
+    }
 
+    const all_users = await User.find(query, { password: 0 });
     return res.status(200).json(all_users);
   } catch (err) {
     return res.status(500).json({ message: err });
