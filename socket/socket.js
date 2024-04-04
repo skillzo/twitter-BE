@@ -27,17 +27,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("setMessage", (msg) => {
-    console.log("socket message", msg);
-    io.emit("getMessage", msg);
+    const receiverSocketId = users.filter(
+      (user) => user.userId === msg.receiverId
+    );
+    io.to(receiverSocketId.socketId).emit("getMessage", msg);
   });
 
-  socket.on("isTyping", (isTyping) => {
-    io.emit("userIstyping", isTyping);
+  socket.on("isTyping", ({ isTyping, receiverId }) => {
+    const receiverSocketId = users.filter((user) => user.userId === receiverId);
+    io.to(receiverSocketId.socketId).emit("userIstyping", isTyping);
   });
 
   socket.on("disconnect", () => {
     removeUser(socket.id);
-    console.log("user disconnected");
   });
 });
 
