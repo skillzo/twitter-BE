@@ -14,16 +14,13 @@ const messageRoute = require("./routes/message-route");
 const { storage, fileFilter } = require("./config/upload-config");
 
 const { default: mongoose } = require("mongoose");
-const verifyjwt = require("./libs/verifyJWt");
+const verifyjwt = require("./libs/verifyjwt");
 const jwt = require("jsonwebtoken");
 dotenv.config();
 
 mongoose.connect(process.env.mongoDB_URI);
 
 // Event listener for successful connection
-mongoose.connection.on("open", () => {
-  console.log("Connected to MongoDB successfully");
-});
 
 // middleware
 app.use(express.json());
@@ -52,12 +49,10 @@ app.use("/api/comment", commentRoute);
 app.use("/api/conversation", conversationRoute);
 app.use("/api/message", messageRoute);
 
-const port = process.env.PORT || 8000;
-app.listen(port, () => {
-  mongoose.connection.on("error", (error) => {
-    console.error("MongoDB connection error:", error);
-    if (!error) {
-      console.log(`server running on port ${port}`);
-    }
+const port = process.env.PORT || 8080;
+mongoose.connection.on("open", () => {
+  console.log("Connected to MongoDB successfully");
+  app.listen(port, () => {
+    console.log(`server running on port ${port}`);
   });
 });

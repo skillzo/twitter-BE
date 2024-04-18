@@ -43,7 +43,6 @@ router.get("/getAll", async (req, res) => {
         ],
       });
 
-    //console.log("all tweet ", all_tweets);
     return res.status(200).json({ message: "sucessfull", data: all_tweets });
   } catch (err) {
     res.status(500).json({ message: err });
