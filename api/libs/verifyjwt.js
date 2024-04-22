@@ -11,8 +11,9 @@ const verifyjwt = async (req, res, next) => {
   const token = user_token.split(" ")[1];
 
   jwt.verify(token, process.env.jwt_key, (err) => {
-    if (err) {
-      return res.status(401).json({ message: err });
+    if (err && err.message === "invalid signature") {
+      console.log("token error here", err);
+      return res.status(401).json({ message: "Invalid token " });
     }
 
     next();
