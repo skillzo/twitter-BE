@@ -1,37 +1,8 @@
 const router = require("express").Router();
 const bcrypt = require("bcrypt");
-const { mongoose } = require("mongoose");
-
 const User = require("../model/Users");
+
 const getLoggedInUser = require("../libs/getLoggedInUser");
-
-//create user
-router.post("/create", async (req, res) => {
-  const payload = req.body;
-  const username_exist = await User.findOne({ username: payload.username });
-  const useremail_exist = await User.findOne({ email: payload.email });
-
-  if (username_exist || useremail_exist) {
-    return res.status(403).json({ message: "user already exist" });
-  }
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const hashed_password = await bcrypt.hash(payload.password, salt);
-
-    const new_user = new User({
-      username: payload.username,
-      email: payload.email,
-      password: hashed_password,
-    });
-
-    const user = await new_user.save();
-
-    res.status(200).json({ message: "succesful", data: user });
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
 
 //get all users
 router.get("/getAll", async (req, res) => {

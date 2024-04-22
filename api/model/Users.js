@@ -63,7 +63,15 @@ const UserSchema = new mongoose.Schema(
       default: [],
     },
   },
-  { timestamps: true, virtuals: true }
+  {
+    timestamps: true,
+    virtuals: true,
+    toJSON: {
+      transform: function (doc, ret) {
+        delete ret.__v;
+      },
+    },
+  }
 );
 
 module.exports = mongoose.model("User", UserSchema);
