@@ -7,7 +7,6 @@ const router = require("express").Router();
 router.post("/create/:id", async (req, res) => {
   const user = getLoggedInUser(req);
 
-  console.log("comment tweet", req.params);
   try {
     const new_comment = new Comment({
       content: req.body.content,
@@ -25,7 +24,6 @@ router.post("/create/:id", async (req, res) => {
 
     return res.status(200).json({ messaage: "Sucessfull" });
   } catch (err) {
-    console.log("create tweet error here", err);
     return res.status(500).json({ messaage: err });
   }
 });

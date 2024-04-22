@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
-const multer = require("multer");
 const uuid = require("uuid");
 const cors = require("cors");
 
@@ -11,37 +10,22 @@ const tweetRoute = require("./routes/tweet-route");
 const commentRoute = require("./routes/comment-route");
 const conversationRoute = require("./routes/conversation-route");
 const messageRoute = require("./routes/message-route");
+const verifyjwt = require("./libs/verifyjwt");
 const { storage, fileFilter } = require("./config/upload-config");
 
 const { default: mongoose } = require("mongoose");
-const verifyjwt = require("./libs/verifyjwt");
-const jwt = require("jsonwebtoken");
 dotenv.config();
 
 mongoose.connect(process.env.mongoDB_URI);
-
-// Event listener for successful connection
 
 // middleware
 app.use(express.json());
 app.use(cors());
 
-app.use("/auth", authRoute);
+app.use("/api/auth", authRoute);
 
-const upload = multer({
-  storage,
-  // fileFilter,
-  // limits: {
-  //   fileSize: 2 * 1024 * 1024,
-  // },
-});
-
-// app.use(verifyjwt);
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  const file = req.file;
-  // console.log(file);
-  // res.status(200).json(file);
-});
+//protected routes
+app.use(verifyjwt);
 
 app.use("/api/users", userRoute);
 app.use("/api/tweet", tweetRoute);

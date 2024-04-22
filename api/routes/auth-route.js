@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
 const router = require("express").Router();
 
 const User = require("../model/Users");
@@ -21,7 +22,7 @@ router.post("/login", async (req, res) => {
   try {
     found_user = await User.findOne({ username });
     if (!found_user) {
-      return res.status(404).send({ message: "user does not exist" });
+      return res.status(404).send({ message: "Invaild username or password" });
     }
 
     const password_match = await bcrypt.compare(password, found_user.password);
@@ -53,13 +54,12 @@ router.post("/login", async (req, res) => {
       });
     }
   } catch (err) {
-    console.log("login error here", err);
     res.sendStatus(500);
   }
 });
 
 //create user
-router.post("/signup", async (req, res) => {
+router.post("/sign-up", async (req, res) => {
   const payload = req.body;
   const username_exist = await User.findOne({ username: payload.username });
   const useremail_exist = await User.findOne({ email: payload.email });
@@ -106,6 +106,27 @@ router.post("/signup", async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: err });
+  }
+});
+
+//reset password
+router.post("/reset-password", async (req, res) => {
+  const { username, email, password } = req.body;
+  const found_user = await User.findOne({ username });
+
+  if (!found_user) {
+    return res.status(403).json("user does not exit");
+  } else {
+    const salt = await bcrypt.genSalt(10);
+    const hashed_password = await bcrypt.hash(password, salt);
+
+    await User.findByIdAndUpdate(
+      { _id: found_user._id },
+      { $set: { password: hashed_password } },
+      { returnOriginal: false }
+    );
+
+    return res.status(200).json({ message: "Password updated" });
   }
 });
 
