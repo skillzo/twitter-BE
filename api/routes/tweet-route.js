@@ -51,6 +51,7 @@ router.get("/getAll", async (req, res) => {
 
 //get tweets by id
 router.get("/getById/:id", async (req, res) => {
+  console.log("res", req);
   try {
     const tweet_by_id = await Tweet.findOne({ _id: req.params.id })
       .populate({
@@ -91,7 +92,7 @@ router.get("/getById/:id", async (req, res) => {
 });
 
 //get user tweet
-router.get("/getByUser/:id", async (req, res) => {
+router.get("/geUserTweets/:id", async (req, res) => {
   try {
     const all_user_tweets = await Tweet.find({
       user: req.params.id,
@@ -105,7 +106,7 @@ router.get("/getByUser/:id", async (req, res) => {
         "profile.profile_picture",
       ],
     });
-    res.status(200).json(all_user_tweets);
+    res.status(200).json({ message: "sucessfull", data: all_user_tweets });
   } catch (err) {
     res.status(500).json(err);
   }

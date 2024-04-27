@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
-const uuid = require("uuid");
 const cors = require("cors");
 
 const userRoute = require("./routes/users-route");
@@ -24,9 +23,9 @@ app.use(cors());
 
 app.use("/api/auth", authRoute);
 
-//protected routes
 app.use(verifyjwt);
 
+//protected routes
 app.use("/api/users", userRoute);
 app.use("/api/tweet", tweetRoute);
 app.use("/api/comment", commentRoute);

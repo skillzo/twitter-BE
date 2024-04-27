@@ -15,7 +15,6 @@ const verifyjwt = async (req, res, next) => {
       console.log("token error here", err);
       return res.status(401).json({ message: "Invalid token " });
     }
-
     next();
   });
 };

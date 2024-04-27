@@ -54,6 +54,10 @@ const UserSchema = new mongoose.Schema(
       },
     },
 
+    salt: {
+      type: String,
+      default: "",
+    },
     followers: {
       type: Array,
       default: [],

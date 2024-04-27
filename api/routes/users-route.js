@@ -17,8 +17,13 @@ router.get("/getAll", async (req, res) => {
       };
     }
 
-    const all_users = await User.find(query, { password: 0 });
-    return res.status(200).json(all_users);
+    const all_users = await User.find(query, [
+      "username",
+      "profile.profile_picture",
+      "profile.name",
+      "profile.is_verified",
+    ]);
+    return res.status(200).json({ message: "Sucessfull", data: all_users });
   } catch (err) {
     return res.status(500).json({ message: err });
   }
