@@ -51,7 +51,6 @@ router.get("/getAll", async (req, res) => {
 
 //get tweets by id
 router.get("/getById/:id", async (req, res) => {
-  console.log("res", req);
   try {
     const tweet_by_id = await Tweet.findOne({ _id: req.params.id })
       .populate({
@@ -203,10 +202,22 @@ router.get("/timelineFeed", async (req, res) => {
     const user = await User.findOne({ _id: loggedIn_user.id });
 
     const timeline_post = await Promise.all(
-      user.followings.map((f) => Tweet.find({ user: f }))
+      user.followings.map((f) =>
+        Tweet.find({ user: f }, ["user", "_id", "createdAt", "content"])
+          .sort({ createdAt: -1 })
+          .populate({
+            path: "user",
+            select: [
+              "_id",
+              "profile.name",
+              "profile.profile_picture",
+              "profile.is_verified",
+            ],
+          })
+      )
     );
 
-    res.status(200).json(timeline_post);
+    res.status(200).json({ message: "sucessfull", data: timeline_post.flat() });
   } catch (err) {
     res.status(500).json(err);
   }

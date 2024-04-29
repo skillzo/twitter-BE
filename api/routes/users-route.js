@@ -31,31 +31,14 @@ router.get("/getAll", async (req, res) => {
 
 router.get("/getById/:id", async (req, res) => {
   try {
-    const user = await User.findById({ _id: req.params.id }, { password: 0 })
-      .populate({
-        path: "followings",
-        model: "User",
-        select: [
-          "_id",
-          "username",
-          "profile.name",
-          "profile.is_verified",
-          "profile.profile_picture",
-        ],
-      })
-      .populate({
-        path: "followers",
-        model: "User",
-        select: [
-          "_id",
-          "username",
-          "profile.name",
-          "profile.is_verified",
-          "profile.profile_picture",
-        ],
-      });
+    const user = await User.findById(
+      { _id: req.params.id },
+      { password: 0, salt: 0, updatedAt: 0, createdAt: 0 }
+    );
 
-    res.status(200).json(user);
+    console;
+
+    res.status(200).json({ message: "sucessfull", data: user });
   } catch (err) {
     res.status(500).json(err);
   }
@@ -89,7 +72,7 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 // follow user
-router.post("/follow/:id", async (req, res) => {
+router.get("/follow/:id", async (req, res) => {
   try {
     const loggedIn_user = getLoggedInUser(req);
     const to_be_followed = await User.findOne({ _id: req.params.id });
