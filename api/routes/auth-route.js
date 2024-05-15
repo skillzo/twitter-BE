@@ -14,6 +14,8 @@ dotenv.config();
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
+  console.log("test", req.body);
+
   //   invalid input in the frontend
   if (!username || !password) {
     return res.status(400).json({ message: "name and password are required." });

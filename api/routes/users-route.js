@@ -72,10 +72,15 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 // follow user
-router.get("/follow/:id", async (req, res) => {
+router.post("/follow", async (req, res) => {
   try {
     const loggedIn_user = getLoggedInUser(req);
-    const to_be_followed = await User.findOne({ _id: req.params.id });
+
+    const to_be_followed = await User.findOne({ _id: req.body.id });
+    if (loggedIn_user.id === to_be_followed._id) {
+      res.status(409).send({ message: "You cant follow yourself" });
+      return;
+    }
 
     const already_follow = to_be_followed.followers.some((f) =>
       f.includes(loggedIn_user.id)
@@ -118,6 +123,7 @@ router.get("/follow/:id", async (req, res) => {
           },
         }
       );
+
       res.status(200).json("User has been followed");
     }
   } catch (err) {
