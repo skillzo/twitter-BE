@@ -137,20 +137,23 @@ router.post("/like/:id", async (req, res) => {
   try {
     const tweet = await Tweet.findOne({ _id: req.params.id });
 
-    const already_liked = tweet.likes.some((like) =>
-      like.id.includes(loggedIn_user.id)
-    );
+    const already_liked = tweet.likes.includes(loggedIn_user.id);
+
+    // withe logged in user object
+    // const already_liked = tweet.likes.some((like) =>
+    //   like.id.includes(loggedIn_user.id)
+    // );
 
     if (already_liked) {
       await Tweet.findByIdAndUpdate(
         { _id: req.params.id },
-        { $pull: { likes: loggedIn_user } }
+        { $pull: { likes: loggedIn_user.id } }
       );
       res.status(200).json("Tweet has been unliked");
     } else {
       await Tweet.findByIdAndUpdate(
         { _id: req.params.id },
-        { $push: { likes: loggedIn_user } }
+        { $push: { likes: loggedIn_user.id } }
       );
       res.status(200).json("Tweet has been liked");
     }
@@ -160,14 +163,17 @@ router.post("/like/:id", async (req, res) => {
 });
 
 // retweet
-router.get("/retweet/:id", async (req, res) => {
+router.post("/retweet/:id", async (req, res) => {
   const loggedIn_user = getLoggedInUser(req);
 
   try {
     const tweet = await Tweet.findOne({ _id: req.params.id });
-    const already_retweeted = tweet.retweets.some((retweet) =>
-      retweet.includes(loggedIn_user.id)
-    );
+
+    const already_retweeted = tweet.retweets.includes(loggedIn_user.id);
+
+    // const already_retweeted = tweet.retweets.some((retweet) =>
+    //   retweet.includes(loggedIn_user.id)
+    // );
 
     if (already_retweeted) {
       await Tweet.findByIdAndUpdate(
